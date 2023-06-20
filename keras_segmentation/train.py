@@ -56,34 +56,6 @@ class CheckpointsCallback(Callback):
         if self.checkpoints_path is not None:
             self.model.save_weights(self.checkpoints_path + "." + str(epoch))
             print("Saved", self.checkpoints_path + "." + str(epoch))
-            
-            #-----------------NEW-----------------------
-            #---------------------------------------
-            # Generate and save the loss plot
-            print('logs',logs)
-            loss = logs['loss']
-            val_loss = logs['val_loss']
-            plt.plot(loss, label='Train Loss')
-            plt.plot(val_loss, label='Validation Loss')
-            plt.xlabel('Epoch')
-            plt.ylabel('Loss')
-            plt.legend()
-            plt.savefig(self.checkpoints_path + "_loss_plot.png")
-            plt.close()
-
-            # Generate and save the accuracy plot
-            acc = logs['accuracy']
-            val_acc = logs['val_accuracy']
-            plt.plot(acc, label='Train Accuracy')
-            plt.plot(val_acc, label='Validation Accuracy')
-            plt.xlabel('Epoch')
-            plt.ylabel('Accuracy')
-            plt.legend()
-            plt.savefig(self.checkpoints_path + "_accuracy_plot.png")
-            plt.close()
-
-            #-----------------------------------------------------                
-            #-----------------------------------------------------
 
 def train(model,
           train_images,
@@ -208,18 +180,15 @@ def train(model,
             preprocessing=preprocessing, read_image_type=read_image_type)
 
     if callbacks is None and (not checkpoints_path is  None) :
-        # default_callback = ModelCheckpoint(
-        #         filepath=checkpoints_path + ".{epoch:05d}",
-        #         save_weights_only=True,
-        #         verbose=True
-        #     )
+        default_callback = ModelCheckpoint(
+                filepath=checkpoints_path + ".{epoch:05d}",
+                save_weights_only=True,
+                verbose=True
+            )
 
-        # if sys.version_info[0] < 3: # for pyhton 2 
-        #     default_callback = CheckpointsCallback(checkpoints_path)
+        if sys.version_info[0] < 3: # for pyhton 2 
+            default_callback = CheckpointsCallback(checkpoints_path)
 
-        #---------------------NEW-----------------------------------
-        default_callback = CheckpointsCallback(checkpoints_path)
-        #----------------------------------------------------------
         callbacks = [
             default_callback
         ]
@@ -232,10 +201,34 @@ def train(model,
         model.fit(train_gen, steps_per_epoch=steps_per_epoch,
                   epochs=epochs, callbacks=callbacks, initial_epoch=initial_epoch)
     else:
-        model.fit(train_gen,
+        history=model.fit(train_gen,
                   steps_per_epoch=steps_per_epoch,
                   validation_data=val_gen,
                   validation_steps=val_steps_per_epoch,
                   epochs=epochs, callbacks=callbacks,
                   use_multiprocessing=gen_use_multiprocessing, initial_epoch=initial_epoch)
-
+#-----------------------------------------NEW--------------------------------------------------
+#----------------------------------------------------------------------------------------------
+        loss = history.history['loss']
+        val_loss = history.history['val_loss']
+        accuracy = history.history['accuracy']
+        val_accuracy = history.history['val_accuracy']
+        # Plot loss
+        plt.plot(range(epochs), history['loss'], label='Training Loss')
+        plt.plot(range(epochs), history['val_loss'], label='Validation Loss')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.legend()
+        plt.savefig(checkpoints_path + '_loss.png')
+        plt.show()
+        
+        # Plot accuracy
+        plt.plot(range(epochs), history['accuracy'], label='Training Accuracy')
+        plt.plot(range(epochs), history['val_accuracy'], label='Validation Accuracy')
+        plt.xlabel('Epochs')
+        plt.ylabel('Accuracy')
+        plt.legend()
+        plt.savefig(checkpoints_path + '_accuracy.png')
+        plt.show()
+#----------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------
