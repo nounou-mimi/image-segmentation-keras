@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import json
 import os
 
@@ -195,6 +196,19 @@ def train(model,
 
     if callbacks is None:
         callbacks = []
+    
+    #-------------------------NEW--------------------------------
+    #--------------------------------------------------------
+    # Define a custom callback to track loss and accuracy
+    class LossAccCallback(Callback):
+        def on_epoch_end(self, epoch, logs=None):
+            loss_values.append(logs['loss'])
+            acc_values.append(logs['accuracy'])
+
+    # Add the LossAccCallback to the list of callbacks
+    callbacks.append(LossAccCallback())
+    #--------------------------------------------------------
+    #--------------------------------------------------------
 
     if not validate:
         model.fit(train_gen, steps_per_epoch=steps_per_epoch,
@@ -206,3 +220,24 @@ def train(model,
                   validation_steps=val_steps_per_epoch,
                   epochs=epochs, callbacks=callbacks,
                   use_multiprocessing=gen_use_multiprocessing, initial_epoch=initial_epoch)
+
+    #-----------------------NEW---------------------------------
+    #--------------------------------------------------------
+    # Plot the loss and accuracy values
+    plt.figure(figsize=(12, 6))
+    plt.subplot(1, 2, 1)
+    plt.plot(range(1, epochs+1), loss_values)
+    plt.title('Training Loss')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+
+    plt.subplot(1, 2, 2)
+    plt.plot(range(1, epochs+1), acc_values)
+    plt.title('Training Accuracy')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+
+    plt.tight_layout()
+    plt.show()
+    #--------------------------------------------------------
+    #----------------------------------------------------------
