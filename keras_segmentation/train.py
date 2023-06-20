@@ -214,8 +214,8 @@ def train(model,
         accuracy = history.history['accuracy']
         val_accuracy = history.history['val_accuracy']
         # Plot loss
-        plt.plot(range(epochs), history['loss'], label='Training Loss')
-        plt.plot(range(epochs), history['val_loss'], label='Validation Loss')
+        plt.plot(loss, label='Training Loss')
+        plt.plot(val_loss, label='Validation Loss')
         plt.xlabel('Epochs')
         plt.ylabel('Loss')
         plt.legend()
@@ -223,8 +223,8 @@ def train(model,
         plt.show()
         
         # Plot accuracy
-        plt.plot(range(epochs), history['accuracy'], label='Training Accuracy')
-        plt.plot(range(epochs), history['val_accuracy'], label='Validation Accuracy')
+        plt.plot(accuracy, label='Training Accuracy')
+        plt.plot(val_accuracy, label='Validation Accuracy')
         plt.xlabel('Epochs')
         plt.ylabel('Accuracy')
         plt.legend()
