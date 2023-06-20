@@ -55,8 +55,38 @@ class CheckpointsCallback(Callback):
     def on_epoch_end(self, epoch, logs=None):
         if self.checkpoints_path is not None:
             self.model.save_weights(self.checkpoints_path + "." + str(epoch))
-            print("saved ", self.checkpoints_path + "." + str(epoch))
+            print("Saved", self.checkpoints_path + "." + str(epoch))
+            
+            #-------------------NEW----------------------
+            #-------------------------------------------
+            # Generate the loss plot
+            loss = logs['loss']
+            val_loss = logs['val_loss']
+            plt.figure(1)
+            plt.plot(loss, label='Train Loss')
+            plt.plot(val_loss, label='Validation Loss')
+            plt.xlabel('Epoch')
+            plt.ylabel('Loss')
+            plt.legend()
 
+            # Generate the accuracy plot
+            acc = logs['accuracy']
+            val_acc = logs['val_accuracy']
+            plt.figure(2)
+            plt.plot(acc, label='Train Accuracy')
+            plt.plot(val_acc, label='Validation Accuracy')
+            plt.xlabel('Epoch')
+            plt.ylabel('Accuracy')
+            plt.legend()
+
+            # Save the plots
+            plt.savefig(self.checkpoints_path + "_plots.png")
+
+            # Show the plots
+            plt.show()
+            plt.close()
+            #-----------------------------------------------------                
+            #-----------------------------------------------------
 
 def train(model,
           train_images,
@@ -197,19 +227,6 @@ def train(model,
     if callbacks is None:
         callbacks = []
     
-    #-------------------------NEW--------------------------------
-    #--------------------------------------------------------
-    # Define a custom callback to track loss and accuracy
-    class LossAccCallback(Callback):
-        def on_epoch_end(self, epoch, logs=None):
-            loss_values.append(logs['loss'])
-            acc_values.append(logs['accuracy'])
-
-    # Add the LossAccCallback to the list of callbacks
-    callbacks.append(LossAccCallback())
-    #--------------------------------------------------------
-    #--------------------------------------------------------
-
     if not validate:
         model.fit(train_gen, steps_per_epoch=steps_per_epoch,
                   epochs=epochs, callbacks=callbacks, initial_epoch=initial_epoch)
@@ -221,23 +238,3 @@ def train(model,
                   epochs=epochs, callbacks=callbacks,
                   use_multiprocessing=gen_use_multiprocessing, initial_epoch=initial_epoch)
 
-    #-----------------------NEW---------------------------------
-    #--------------------------------------------------------
-    # Plot the loss and accuracy values
-    plt.figure(figsize=(12, 6))
-    plt.subplot(1, 2, 1)
-    plt.plot(range(1, epochs+1), loss_values)
-    plt.title('Training Loss')
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-
-    plt.subplot(1, 2, 2)
-    plt.plot(range(1, epochs+1), acc_values)
-    plt.title('Training Accuracy')
-    plt.xlabel('Epochs')
-    plt.ylabel('Accuracy')
-
-    plt.tight_layout()
-    plt.show()
-    #--------------------------------------------------------
-    #----------------------------------------------------------
