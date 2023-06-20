@@ -208,21 +208,25 @@ def train(model,
             preprocessing=preprocessing, read_image_type=read_image_type)
 
     if callbacks is None and (not checkpoints_path is  None) :
-        default_callback = ModelCheckpoint(
-                filepath=checkpoints_path + ".{epoch:05d}",
-                save_weights_only=True,
-                verbose=True
-            )
+        # default_callback = ModelCheckpoint(
+        #         filepath=checkpoints_path + ".{epoch:05d}",
+        #         save_weights_only=True,
+        #         verbose=True
+        #     )
 
-        if sys.version_info[0] < 3: # for pyhton 2 
-            default_callback = CheckpointsCallback(checkpoints_path)
+        # if sys.version_info[0] < 3: # for pyhton 2 
+        #     default_callback = CheckpointsCallback(checkpoints_path)
 
+        #---------------------NEW-----------------------------------
+        default_callback = CheckpointsCallback(checkpoints_path)
+        #----------------------------------------------------------
         callbacks = [
             default_callback
         ]
-
-    if callbacks is None:
-        callbacks = []
+    elif callbacks is None:
+        callbacks=[]
+    # if callbacks is None:
+    #     callbacks = []
     
     if not validate:
         model.fit(train_gen, steps_per_epoch=steps_per_epoch,
