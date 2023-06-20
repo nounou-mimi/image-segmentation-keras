@@ -57,34 +57,31 @@ class CheckpointsCallback(Callback):
             self.model.save_weights(self.checkpoints_path + "." + str(epoch))
             print("Saved", self.checkpoints_path + "." + str(epoch))
             
-            #-------------------NEW----------------------
-            #-------------------------------------------
-            # Generate the loss plot
+            #-----------------NEW-----------------------
+            #---------------------------------------
+            # Generate and save the loss plot
+            print('logs',logs)
             loss = logs['loss']
             val_loss = logs['val_loss']
-            plt.figure(1)
             plt.plot(loss, label='Train Loss')
             plt.plot(val_loss, label='Validation Loss')
             plt.xlabel('Epoch')
             plt.ylabel('Loss')
             plt.legend()
+            plt.savefig(self.checkpoints_path + "_loss_plot.png")
+            plt.close()
 
-            # Generate the accuracy plot
+            # Generate and save the accuracy plot
             acc = logs['accuracy']
             val_acc = logs['val_accuracy']
-            plt.figure(2)
             plt.plot(acc, label='Train Accuracy')
             plt.plot(val_acc, label='Validation Accuracy')
             plt.xlabel('Epoch')
             plt.ylabel('Accuracy')
             plt.legend()
-
-            # Save the plots
-            plt.savefig(self.checkpoints_path + "_plots.png")
-
-            # Show the plots
-            plt.show()
+            plt.savefig(self.checkpoints_path + "_accuracy_plot.png")
             plt.close()
+
             #-----------------------------------------------------                
             #-----------------------------------------------------
 
