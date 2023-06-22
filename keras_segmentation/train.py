@@ -8,7 +8,6 @@ import six
 from keras.callbacks import Callback
 from keras.callbacks import ModelCheckpoint
 from keras.callbacks import LearningRateScheduler
-from keras import optimizers
 
 import tensorflow as tf
 import glob
@@ -90,7 +89,13 @@ def train(model,
           read_image_type=1,  # cv2.IMREAD_COLOR = 1 (rgb),
                              # cv2.IMREAD_GRAYSCALE = 0,
                              # cv2.IMREAD_UNCHANGED = -1 (4 channels like RGBA),
-          learning_rate=0.001
+          #------------NEW-----------------------
+          history_file=None,
+          initial_lr=0.001, 
+          reduce_lr_factor=0.1, 
+          reduce_lr_patience=10,
+          reduce_lr_min_delta=1e-5
+          #------------------------------------------
          ):
     from .models.all_models import model_from_name
     # check if user gives model name instead of the model object
@@ -119,10 +124,9 @@ def train(model,
             loss_k = masked_categorical_crossentropy
         else:
             loss_k = 'categorical_crossentropy'
-            optimizer = optimizers.Adam(lr=learning_rate)
 
         model.compile(loss=loss_k,
-                      optimizer=optimizer,
+                      optimizer=optimizer_name,
                       metrics=['accuracy'])
 
     if checkpoints_path is not None:
@@ -199,8 +203,21 @@ def train(model,
         callbacks=[]
     # if callbacks is None:
     #     callbacks = []
-
              
+#-----------------------------NEW-------------------------------
+#---------------------------------------------------------------
+    def lr_schedule(epoch, lr):
+        if (epoch + 1) % reduce_lr_patience == 0:
+            new_lr = lr * reduce_lr_factor
+            return np.maximum(new_lr, reduce_lr_min_delta)
+        else:
+            return lr
+    
+    lr_scheduler = LearningRateScheduler(lr_schedule)
+    callbacks.append(lr_scheduler)
+#---------------------------------------------------------------
+#---------------------------------------------------------------
+  
     if not validate:
         model.fit(train_gen, steps_per_epoch=steps_per_epoch,
                   epochs=epochs, callbacks=callbacks, initial_epoch=initial_epoch)
