@@ -185,10 +185,8 @@ def train(model,
                 save_weights_only=True,
                 verbose=True
             )
-
         if sys.version_info[0] < 3: # for pyhton 2 
             default_callback = CheckpointsCallback(checkpoints_path)
-
         callbacks = [
             default_callback
         ]
@@ -196,39 +194,54 @@ def train(model,
         callbacks=[]
     # if callbacks is None:
     #     callbacks = []
-    
+#-----------------------------NEW-------------------------------
+#---------------------------------------------------------------
+    # Define a custom callback to save the training history
+    class HistoryCallback(Callback):
+        def __init__(self, history_file):
+            super(HistoryCallback, self).__init__()
+            self.history_file = history_file
+
+        def on_train_begin(self, logs=None):
+            # Create an empty list to store the training history
+            self.history = []
+
+        def on_epoch_end(self, epoch, logs=None):
+            # Extract the metrics from the logs
+            training_loss = logs.get('loss')
+            training_accuracy = logs.get('accuracy')
+            validation_loss = logs.get('val_loss')
+            validation_accuracy = logs.get('val_accuracy')
+
+            # Create a dictionary to store the metrics
+            metrics = {
+                'epoch': epoch,
+                'loss': training_loss,
+                'accuracy': training_accuracy,
+                'val_loss': validation_loss,
+                'val_accuracy': validation_accuracy
+            }
+
+            # Append the metrics to the training history
+            self.history.append(metrics)
+
+            # Save the training history to the file
+            if self.history_file is not None:
+                with open(self.history_file, 'w') as f:
+                    json.dump(self.history, f)
+    history_callback = HistoryCallback(history_file)
+    callbacks.append(history_callback)
+#---------------------------------------------------------------
+#---------------------------------------------------------------
+
+             
     if not validate:
         model.fit(train_gen, steps_per_epoch=steps_per_epoch,
                   epochs=epochs, callbacks=callbacks, initial_epoch=initial_epoch)
     else:
-        history=model.fit(train_gen,
+        model.fit(train_gen,
                   steps_per_epoch=steps_per_epoch,
                   validation_data=val_gen,
                   validation_steps=val_steps_per_epoch,
                   epochs=epochs, callbacks=callbacks,
                   use_multiprocessing=gen_use_multiprocessing, initial_epoch=initial_epoch)
-#-----------------------------------------NEW--------------------------------------------------
-#----------------------------------------------------------------------------------------------
-        loss = history.history['loss']
-        val_loss = history.history['val_loss']
-        accuracy = history.history['accuracy']
-        val_accuracy = history.history['val_accuracy']
-        # Plot loss
-        plt.plot(loss, label='Training Loss')
-        plt.plot(val_loss, label='Validation Loss')
-        plt.xlabel('Epochs')
-        plt.ylabel('Loss')
-        plt.legend()
-        plt.savefig(checkpoints_path + '_loss.png')
-        plt.show()
-        
-        # Plot accuracy
-        plt.plot(accuracy, label='Training Accuracy')
-        plt.plot(val_accuracy, label='Validation Accuracy')
-        plt.xlabel('Epochs')
-        plt.ylabel('Accuracy')
-        plt.legend()
-        plt.savefig(checkpoints_path + '_accuracy.png')
-        plt.show()
-#----------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------
