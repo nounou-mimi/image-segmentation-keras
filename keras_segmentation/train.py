@@ -92,8 +92,8 @@ def train(model,
           #------------NEW-----------------------
           history_file=None,
           initial_lr=0.001, 
-          reduce_lr_factor=0.1, 
-          reduce_lr_patience=10,
+          reduce_lr_factor=0.5, 
+          reduce_lr_patience=5,
           reduce_lr_min_delta=1e-5
           #------------------------------------------
          ):
@@ -205,6 +205,42 @@ def train(model,
     #     callbacks = []
              
 #-----------------------------NEW-------------------------------
+#---------------------------------------------------------------
+    # Define a custom callback to save the training history
+    class HistoryCallback(Callback):
+        def __init__(self, history_file):
+            super(HistoryCallback, self).__init__()
+            self.history_file = history_file
+
+        def on_train_begin(self, logs=None):
+            # Create an empty list to store the training history
+            self.history = []
+
+        def on_epoch_end(self, epoch, logs=None):
+            # Extract the metrics from the logs
+            training_loss = logs.get('loss')
+            training_accuracy = logs.get('accuracy')
+            validation_loss = logs.get('val_loss')
+            validation_accuracy = logs.get('val_accuracy')
+
+            # Create a dictionary to store the metrics
+            metrics = {
+                'epoch': epoch,
+                'loss': training_loss,
+                'accuracy': training_accuracy,
+                'val_loss': validation_loss,
+                'val_accuracy': validation_accuracy
+            }
+
+            # Append the metrics to the training history
+            self.history.append(metrics)
+
+            # Save the training history to the file
+            if self.history_file is not None:
+                with open(self.history_file, 'w') as f:
+                    json.dump(self.history, f)
+    history_callback = HistoryCallback(history_file)
+    callbacks.append(history_callback)             
 #---------------------------------------------------------------
     def lr_schedule(epoch, lr):
         if (epoch + 1) % reduce_lr_patience == 0:
