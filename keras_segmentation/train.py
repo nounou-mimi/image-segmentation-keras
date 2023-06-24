@@ -266,27 +266,27 @@ def train(model,
                   use_multiprocessing=gen_use_multiprocessing, initial_epoch=initial_epoch)
 #-----------------------------------------NEW--------------------------------------------------
 #----------------------------------------------------------------------------------------------
-        loss = history.history['loss']
-        val_loss = history.history['val_loss']
-        accuracy = history.history['accuracy']
-        val_accuracy = history.history['val_accuracy']
-        # Plot loss
-        plt.plot(loss, label='Training Loss')
-        plt.plot(val_loss, label='Validation Loss')
-        plt.xlabel('Epochs')
-        plt.ylabel('Loss')
-        plt.legend()
-        plt.savefig(checkpoints_path + '_loss.png')
-        plt.show()
+        # loss = history.history['loss']
+        # val_loss = history.history['val_loss']
+        # accuracy = history.history['accuracy']
+        # val_accuracy = history.history['val_accuracy']
+        # # Plot loss
+        # plt.plot(loss, label='Training Loss')
+        # plt.plot(val_loss, label='Validation Loss')
+        # plt.xlabel('Epochs')
+        # plt.ylabel('Loss')
+        # plt.legend()
+        # plt.savefig(checkpoints_path + '_loss.png')
+        # plt.show()
         
-        # Plot accuracy
-        plt.plot(accuracy, label='Training Accuracy')
-        plt.plot(val_accuracy, label='Validation Accuracy')
-        plt.xlabel('Epochs')
-        plt.ylabel('Accuracy')
-        plt.legend()
-        plt.savefig(checkpoints_path + '_accuracy.png')
-        plt.show()
+        # # Plot accuracy
+        # plt.plot(accuracy, label='Training Accuracy')
+        # plt.plot(val_accuracy, label='Validation Accuracy')
+        # plt.xlabel('Epochs')
+        # plt.ylabel('Accuracy')
+        # plt.legend()
+        # plt.savefig(checkpoints_path + '_accuracy.png')
+        # plt.show()
 #----------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------
 
